@@ -1,0 +1,3 @@
+[submodule "home-automation-ipc"]
+	path = home-automation-ipc
+	url = https://github.com/DankersW/home-automation-ipc
