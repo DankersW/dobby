@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
+	wsnterminal "github.com/DankersW/dobby/wsn_terminal"
 	proto "github.com/golang/protobuf/proto"
 )
 
@@ -17,4 +18,5 @@ func main() {
 	}
 
 	fmt.Printf("%v", sensorData)
+	wsnterminal.New()
 }
