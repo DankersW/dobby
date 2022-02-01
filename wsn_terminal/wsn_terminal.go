@@ -2,6 +2,7 @@ package wsnterminal
 
 type wsnTerminal struct {
 	port string
+	// TODO: handlers to call on a certain type of message
 }
 
 type WsnTerminal interface {
