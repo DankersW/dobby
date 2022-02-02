@@ -1,4 +1,4 @@
-package wsnterminal
+package wsn_terminal
 
 import (
 	"github.com/pkg/term"

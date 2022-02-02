@@ -5,7 +5,7 @@ import (
 
 	"github.com/DankersW/dobby/config"
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
-	wsnterminal "github.com/DankersW/dobby/wsn_terminal"
+	"github.com/DankersW/dobby/wsn_terminal"
 	proto "github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,6 +22,6 @@ func main() {
 
 	config := config.Get()
 
-	term := wsnterminal.New(config.Wsn.Usb.Port)
+	term := wsn_terminal.New(config.Wsn.Usb.Port)
 	term.Start()
 }
