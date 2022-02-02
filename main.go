@@ -18,8 +18,10 @@ func main() {
 		log.Fatalln("Failed to parse address book:", err)
 	}
 
-	fmt.Printf("%v", sensorData)
+	fmt.Printf("%v\n", sensorData)
 
 	config := config.Get()
-	wsnterminal.New(config.Wsn.Usb.Port)
+
+	term := wsnterminal.New(config.Wsn.Usb.Port)
+	term.Start()
 }
