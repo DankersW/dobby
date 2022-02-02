@@ -39,4 +39,6 @@ func read() {
 func write() {
 }
 
+// docs: https://github.com/pkg/term
+
 // USe go usb: https://pkg.go.dev/github.com/karalabe/usb#section-documentation
