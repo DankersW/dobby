@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/DankersW/dobby/config"
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
 	wsnterminal "github.com/DankersW/dobby/wsn_terminal"
 	proto "github.com/golang/protobuf/proto"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -18,5 +19,7 @@ func main() {
 	}
 
 	fmt.Printf("%v", sensorData)
-	wsnterminal.New()
+
+	config := config.Get()
+	wsnterminal.New(config.Wsn.Usb.Port)
 }

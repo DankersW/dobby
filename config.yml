@@ -1,0 +1,3 @@
+wsn:
+  usb:
+    port: "dev/ttyACM0"
