@@ -1,6 +1,8 @@
 package wsn_terminal
 
 import (
+	"io"
+
 	"github.com/pkg/term"
 	log "github.com/sirupsen/logrus"
 )
@@ -26,11 +28,18 @@ func (wt *wsnTerminal) Start() {
 	port, err := term.Open("/dev/ttyACM0")
 	log.Info(err)
 	log.Info(port)
-	var buff [100]byte
-	l, err := port.Read(buff[:])
-	log.Info(err)
-	log.Info(l)
-	log.Infof("%s", buff)
+
+	for {
+		var buff [100]byte
+		l, err := port.Read(buff[:])
+		if err == io.EOF {
+			log.Error("EOF")
+			break
+		}
+		log.Info(l)
+		log.Infof("%s", buff)
+	}
+
 }
 
 func read() {
