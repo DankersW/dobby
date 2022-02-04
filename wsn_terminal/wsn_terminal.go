@@ -7,12 +7,14 @@ import (
 )
 
 type wsnTerminal struct {
-	usbPort string
+	usbPort    string
+	serialTerm *uart
 	// TODO: handlers to call on a certain type of message
 }
 
 type WsnTerminal interface {
 	Start()
+	Close()
 }
 
 func New(port string) WsnTerminal {
@@ -29,6 +31,7 @@ func (wt *wsnTerminal) Start() {
 		log.Errorf("Failed to open Serial connection to WSN gateway, %s", err.Error())
 		return
 	}
+	wt.serialTerm = serialTerm
 	serialTerm.setup()
 
 	count := 0
@@ -46,5 +49,11 @@ func (wt *wsnTerminal) Start() {
 			count = 0
 		}
 		count++
+	}
+}
+
+func (wt *wsnTerminal) Close() {
+	if err := wt.serialTerm.close(); err != nil {
+		log.Errorf("failed to close serial terminal, %s", err)
 	}
 }
