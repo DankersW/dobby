@@ -43,8 +43,33 @@ func (wt *wsnTerminal) Start() {
 		}
 	*/
 
+	serialTerm, err := newUartConnection("/dev/ttyACM1")
+	if err != nil {
+		log.Errorf("Failed to open Serial connection to WSN gateway, %s", err.Error())
+		return
+	}
+
+	count := 0
+
+	for {
+		data, err := serialTerm.read()
+		if err != nil {
+			log.Errorf("Failed to read from serial, %s", err)
+			continue
+		}
+		log.Infof("Received: %s", data)
+		time.Sleep(1 * time.Second)
+		if count == 5 {
+			serialTerm.write()
+			count = 0
+		}
+		//count++
+	}
+
+	// FIXME: REMOVE
+
 	config := &serial.Config{
-		Name:        "/dev/ttyACM0",
+		Name:        "/dev/ttyACM1",
 		Baud:        9600,
 		ReadTimeout: 1,
 		Size:        8,
@@ -55,7 +80,7 @@ func (wt *wsnTerminal) Start() {
 		log.Fatal(err)
 	}
 
-	count := 0
+	//count := 0
 	for {
 		scanner := bufio.NewScanner(stream)
 		for scanner.Scan() {
@@ -67,8 +92,8 @@ func (wt *wsnTerminal) Start() {
 
 		if count == 3 {
 			log.Info("c 20")
-			writer := bufio.NewWriter(stream)
 
+			writer := bufio.NewWriter(stream)
 			writer.Reset(stream)
 			writer.WriteString("thread multi_light toggle\n")
 			writer.Flush()
@@ -83,12 +108,6 @@ func (wt *wsnTerminal) Start() {
 
 	 */
 
-}
-
-func read() {
-}
-
-func write() {
 }
 
 // Serial: https://pkg.go.dev/github.com/tarm/serial
