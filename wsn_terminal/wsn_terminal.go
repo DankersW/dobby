@@ -48,6 +48,7 @@ func (wt *wsnTerminal) Start() {
 		log.Errorf("Failed to open Serial connection to WSN gateway, %s", err.Error())
 		return
 	}
+	serialTerm.setup()
 
 	count := 0
 
@@ -57,13 +58,14 @@ func (wt *wsnTerminal) Start() {
 			log.Errorf("Failed to read from serial, %s", err)
 			continue
 		}
-		log.Infof("Received: %s", data)
+		log.Infof("Data: %s", data)
 		time.Sleep(1 * time.Second)
+
 		if count == 5 {
-			serialTerm.write()
+			serialTerm.write("thread multi_light toggle")
 			count = 0
 		}
-		//count++
+		count++
 	}
 
 	// FIXME: REMOVE
