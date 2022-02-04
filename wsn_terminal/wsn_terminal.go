@@ -65,8 +65,14 @@ func (wt *wsnTerminal) Start() {
 			log.Fatal(err)
 		}
 
-		if count == 5 {
+		if count == 3 {
 			log.Info("c 20")
+			writer := bufio.NewWriter(stream)
+
+			writer.Reset(stream)
+			writer.WriteString("thread multi_light toggle\n")
+			writer.Flush()
+
 			count = 0
 		}
 		time.Sleep(1 * time.Second) // TODO: use a go-routine for this
