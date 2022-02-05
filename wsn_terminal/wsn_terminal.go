@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	READ_INTERVAL = 1 // SECONDS
+	READ_INTERVAL = 100 // MILI_SECONDS
 )
 
 type wsnTerminal struct {
@@ -41,8 +41,8 @@ func (wt *wsnTerminal) Start() {
 	wt.serial.setup()
 	wt.serial.write("thread monitor temp on")
 
-	read := time.NewTicker(time.Duration(READ_INTERVAL) * time.Second)
-	toggle := time.NewTicker(time.Duration(10) * time.Second)
+	read := time.NewTicker(time.Duration(READ_INTERVAL) * time.Millisecond)
+	toggle := time.NewTicker(time.Duration(3) * time.Second)
 	for {
 		select {
 		case <-read.C:
@@ -84,7 +84,7 @@ func cleanup(raw string) string {
 		}
 		return -1
 	}, raw)
-	if strings.HasPrefix(clean, "[8D[J") {
+	if strings.HasPrefix(clean, "[8D[J") { // ALSO handle [21D[J
 		clean = strings.Replace(clean, "[8D[J", "", 1)
 	}
 	return clean
