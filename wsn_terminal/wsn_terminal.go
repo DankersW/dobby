@@ -6,8 +6,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	READ_INTERVAL = 1 // SECONDS
+)
+
 type wsnTerminal struct {
-	serial *uart
+	serial           *uart
+	quitPeriodicWork chan bool
 	// TODO: handlers to call on a certain type of message
 }
 
@@ -24,14 +29,16 @@ func New(port string) (WsnTerminal, error) {
 	}
 
 	wt := &wsnTerminal{
-		serial: serialTerm,
+		serial:           serialTerm,
+		quitPeriodicWork: make(chan bool),
 	}
 	return wt, nil
 }
 
 func (wt *wsnTerminal) Start() {
-
 	wt.serial.setup()
+
+	go wt.periodicRead(READ_INTERVAL)
 
 	count := 0
 	for {
@@ -52,7 +59,21 @@ func (wt *wsnTerminal) Start() {
 }
 
 func (wt *wsnTerminal) Close() {
+	wt.quitPeriodicWork <- true
 	if err := wt.serial.close(); err != nil {
 		log.Errorf("failed to close serial terminal, %s", err)
+	}
+}
+
+func (wt *wsnTerminal) periodicRead(interval int) {
+	ticker := time.NewTicker(time.Duration(interval) * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			log.Info("hi")
+		case <-wt.quitPeriodicWork:
+			ticker.Stop()
+			return
+		}
 	}
 }

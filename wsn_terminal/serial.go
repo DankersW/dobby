@@ -41,6 +41,7 @@ func (u *uart) read() (string, error) {
 	for scanner.Scan() {
 		return scanner.Text(), nil
 	}
+	log.Infof("err: %s", scanner.Err())
 	return "", scanner.Err()
 }
 
