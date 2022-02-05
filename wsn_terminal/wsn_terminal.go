@@ -1,7 +1,9 @@
 package wsn_terminal
 
 import (
+	"strings"
 	"time"
+	"unicode"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -53,25 +55,6 @@ func (wt *wsnTerminal) Start() {
 			// Lwait for events that needs to be transmitted
 		}
 	}
-
-	count := 0
-	for {
-		data, err := wt.serial.read()
-		if err != nil {
-			log.Errorf("Failed to read from serial, %s", err)
-			continue
-		}
-		log.Infof("Data: %s", data)
-		time.Sleep(1 * time.Second)
-
-		if count == 5 {
-
-			count = 0
-		}
-		count++
-
-		// Here we will wait for an event to come in and we handle it aka write it
-	}
 }
 
 func (wt *wsnTerminal) Close() {
@@ -82,16 +65,27 @@ func (wt *wsnTerminal) Close() {
 }
 
 func (wt *wsnTerminal) listen() {
-	data, err := wt.serial.read()
+	rawData, err := wt.serial.read()
 	if err != nil {
 		log.Errorf("Received an error while reading from UART, %s", err)
 	}
-	if data == "" || data == "uart:~$ " {
+	if rawData == "" || strings.Contains(rawData, "uart:~$ ") {
 		return
 	}
-	if data == "uart:~$ " {
-		log.Error(data)
+	data := cleanup(rawData)
+	log.Infof("Received: %q", data)
+}
+
+func cleanup(raw string) string {
+	log.Debugf("raw |%q|", raw)
+	clean := strings.Map(func(r rune) rune {
+		if unicode.IsGraphic(r) {
+			return r
+		}
+		return -1
+	}, raw)
+	if strings.HasPrefix(clean, "[8D[J") {
+		clean = strings.Replace(clean, "[8D[J", "", 1)
 	}
-	sample := "[01:28:35.582,580] <inf> ot_coap: SensorData | 10 3 83 48 49 21 0 0 216 65 | 10 | fdde:ad00:beef:0:900a:1515:876a:92a4"
-	log.Infof("Data: |%s| len: %d, sample: %d", data, len(data), len(sample))
+	return clean
 }
