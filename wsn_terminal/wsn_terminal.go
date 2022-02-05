@@ -37,6 +37,7 @@ func New(port string) (WsnTerminal, error) {
 
 func (wt *wsnTerminal) Start() {
 	wt.serial.setup()
+	wt.serial.write("thread monitor temp on")
 
 	read := time.NewTicker(time.Duration(READ_INTERVAL) * time.Second)
 	toggle := time.NewTicker(time.Duration(10) * time.Second)
@@ -49,6 +50,7 @@ func (wt *wsnTerminal) Start() {
 		case <-wt.quit:
 			read.Stop()
 			return
+			// Lwait for events that needs to be transmitted
 		}
 	}
 
@@ -80,14 +82,16 @@ func (wt *wsnTerminal) Close() {
 }
 
 func (wt *wsnTerminal) listen() {
-	log.Info("Listing to the wns nodes")
 	data, err := wt.serial.read()
 	if err != nil {
 		log.Errorf("Received an error while reading from UART, %s", err)
 	}
-	if data == "" || data == "uart" {
+	if data == "" || data == "uart:~$ " {
 		return
 	}
-
-	log.Infof("Data: %s", data)
+	if data == "uart:~$ " {
+		log.Error(data)
+	}
+	sample := "[01:28:35.582,580] <inf> ot_coap: SensorData | 10 3 83 48 49 21 0 0 216 65 | 10 | fdde:ad00:beef:0:900a:1515:876a:92a4"
+	log.Infof("Data: |%s| len: %d, sample: %d", data, len(data), len(sample))
 }
