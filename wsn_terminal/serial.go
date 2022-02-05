@@ -36,6 +36,7 @@ func (u *uart) close() error {
 	return u.stream.Close()
 }
 
+// FIXME: sometimes this function really messes up
 func (u *uart) read() (string, error) {
 	scanner := bufio.NewScanner(u.stream)
 	for scanner.Scan() {
