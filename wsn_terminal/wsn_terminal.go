@@ -43,9 +43,9 @@ func (wt *wsnTerminal) Start() {
 	for {
 		select {
 		case <-read.C:
-			log.Info("Reading")
+			wt.listen()
 		case <-toggle.C:
-			log.Info("toggle")
+			wt.serial.write("thread multi_light toggle")
 		case <-wt.quit:
 			read.Stop()
 			return
@@ -63,7 +63,7 @@ func (wt *wsnTerminal) Start() {
 		time.Sleep(1 * time.Second)
 
 		if count == 5 {
-			wt.serial.write("thread multi_light toggle")
+
 			count = 0
 		}
 		count++
@@ -77,4 +77,17 @@ func (wt *wsnTerminal) Close() {
 	if err := wt.serial.close(); err != nil {
 		log.Errorf("failed to close serial terminal, %s", err)
 	}
+}
+
+func (wt *wsnTerminal) listen() {
+	log.Info("Listing to the wns nodes")
+	data, err := wt.serial.read()
+	if err != nil {
+		log.Errorf("Received an error while reading from UART, %s", err)
+	}
+	if data == "" || data == "uart" {
+		return
+	}
+
+	log.Infof("Data: %s", data)
 }
