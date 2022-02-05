@@ -7,8 +7,7 @@ import (
 )
 
 type wsnTerminal struct {
-	usbPort    string
-	serialTerm *uart
+	serial *uart
 	// TODO: handlers to call on a certain type of message
 }
 
@@ -17,26 +16,26 @@ type WsnTerminal interface {
 	Close()
 }
 
-func New(port string) WsnTerminal {
-	wt := &wsnTerminal{
-		usbPort: port,
+func New(port string) (WsnTerminal, error) {
+	serialTerm, err := newUartConnection(port)
+	if err != nil {
+		log.Errorf("Failed to open Serial connection to WSN gateway, %s", err.Error())
+		return nil, err
 	}
-	return wt
+
+	wt := &wsnTerminal{
+		serial: serialTerm,
+	}
+	return wt, nil
 }
 
 func (wt *wsnTerminal) Start() {
 
-	serialTerm, err := newUartConnection(wt.usbPort)
-	if err != nil {
-		log.Errorf("Failed to open Serial connection to WSN gateway, %s", err.Error())
-		return
-	}
-	wt.serialTerm = serialTerm
-	serialTerm.setup()
+	wt.serial.setup()
 
 	count := 0
 	for {
-		data, err := serialTerm.read()
+		data, err := wt.serial.read()
 		if err != nil {
 			log.Errorf("Failed to read from serial, %s", err)
 			continue
@@ -45,7 +44,7 @@ func (wt *wsnTerminal) Start() {
 		time.Sleep(1 * time.Second)
 
 		if count == 5 {
-			serialTerm.write("thread multi_light toggle")
+			wt.serial.write("thread multi_light toggle")
 			count = 0
 		}
 		count++
@@ -53,7 +52,7 @@ func (wt *wsnTerminal) Start() {
 }
 
 func (wt *wsnTerminal) Close() {
-	if err := wt.serialTerm.close(); err != nil {
+	if err := wt.serial.close(); err != nil {
 		log.Errorf("failed to close serial terminal, %s", err)
 	}
 }

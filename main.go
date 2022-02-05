@@ -22,6 +22,9 @@ func main() {
 
 	config := config.Get()
 
-	term := wsn_terminal.New(config.Wsn.Usb.Port)
+	term, err := wsn_terminal.New(config.Wsn.Usb.Port)
+	if err != nil {
+		log.Errorf("terminal failed to setup: %s", err.Error())
+	}
 	term.Start()
 }
