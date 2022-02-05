@@ -11,8 +11,8 @@ const (
 )
 
 type wsnTerminal struct {
-	serial           *uart
-	quitPeriodicWork chan bool
+	serial *uart
+	quit   chan bool
 	// TODO: handlers to call on a certain type of message
 }
 
@@ -29,8 +29,8 @@ func New(port string) (WsnTerminal, error) {
 	}
 
 	wt := &wsnTerminal{
-		serial:           serialTerm,
-		quitPeriodicWork: make(chan bool),
+		serial: serialTerm,
+		quit:   make(chan bool),
 	}
 	return wt, nil
 }
@@ -38,7 +38,19 @@ func New(port string) (WsnTerminal, error) {
 func (wt *wsnTerminal) Start() {
 	wt.serial.setup()
 
-	go wt.periodicRead(READ_INTERVAL)
+	read := time.NewTicker(time.Duration(READ_INTERVAL) * time.Second)
+	toggle := time.NewTicker(time.Duration(10) * time.Second)
+	for {
+		select {
+		case <-read.C:
+			log.Info("Reading")
+		case <-toggle.C:
+			log.Info("toggle")
+		case <-wt.quit:
+			read.Stop()
+			return
+		}
+	}
 
 	count := 0
 	for {
@@ -55,25 +67,14 @@ func (wt *wsnTerminal) Start() {
 			count = 0
 		}
 		count++
+
+		// Here we will wait for an event to come in and we handle it aka write it
 	}
 }
 
 func (wt *wsnTerminal) Close() {
-	wt.quitPeriodicWork <- true
+	wt.quit <- true
 	if err := wt.serial.close(); err != nil {
 		log.Errorf("failed to close serial terminal, %s", err)
-	}
-}
-
-func (wt *wsnTerminal) periodicRead(interval int) {
-	ticker := time.NewTicker(time.Duration(interval) * time.Second)
-	for {
-		select {
-		case <-ticker.C:
-			log.Info("hi")
-		case <-wt.quitPeriodicWork:
-			ticker.Stop()
-			return
-		}
 	}
 }
