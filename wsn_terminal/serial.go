@@ -3,6 +3,7 @@ package wsn_terminal
 import (
 	"bufio"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
 )
 
@@ -43,12 +44,14 @@ func (u *uart) read() (string, error) {
 	return "", scanner.Err()
 }
 
-func (u *uart) write(cmd string) error {
+func (u *uart) write(cmd string) {
 	writer := bufio.NewWriter(u.stream)
 	writer.Reset(u.stream)
 	cmd += "\n"
 	if _, err := writer.WriteString(cmd); err != nil {
-		return err
+		log.Error("failed to write to serial port, %s", err)
 	}
-	return writer.Flush()
+	if err := writer.Flush(); err != nil {
+		log.Error("failed to flush, %s", err)
+	}
 }
