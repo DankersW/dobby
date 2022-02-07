@@ -2,6 +2,7 @@ package wsn_terminal
 
 import (
 	"bufio"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
@@ -9,6 +10,7 @@ import (
 
 type uart struct {
 	stream *serial.Port
+	mutex  sync.Mutex
 }
 
 // TODO: READ and write lock
@@ -40,6 +42,8 @@ func (u *uart) close() error {
 
 // FIXME: sometimes this function really messes up
 func (u *uart) read() (string, error) {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
 	scanner := bufio.NewScanner(u.stream)
 	for scanner.Scan() {
 		return scanner.Text(), nil
@@ -50,6 +54,8 @@ func (u *uart) read() (string, error) {
 // TODO: READ and write lock
 
 func (u *uart) write(cmd string) {
+	u.mutex.Lock()
+	defer u.mutex.Unlock()
 	writer := bufio.NewWriter(u.stream)
 	writer.Reset(u.stream)
 	cmd += "\n"
