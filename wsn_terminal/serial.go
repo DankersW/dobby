@@ -50,9 +50,9 @@ func (u *uart) write(cmd string) {
 	writer.Reset(u.stream)
 	cmd += "\n"
 	if _, err := writer.WriteString(cmd); err != nil {
-		log.Error("failed to write to serial port, %s", err)
+		log.Errorf("failed to write to serial port, %s", err.Error())
 	}
 	if err := writer.Flush(); err != nil {
-		log.Error("failed to flush, %s", err)
+		log.Errorf("failed to flush, %s", err.Error())
 	}
 }
