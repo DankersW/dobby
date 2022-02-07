@@ -41,6 +41,7 @@ func (wt *wsnTerminal) Start() {
 	wt.serial.setup()
 	wt.serial.write("thread monitor temp on")
 
+	// TODO: add all times into a array or something to handle all timer related things
 	read := time.NewTicker(time.Duration(READ_INTERVAL) * time.Millisecond)
 	toggle := time.NewTicker(time.Duration(3) * time.Second)
 	for {
@@ -51,6 +52,7 @@ func (wt *wsnTerminal) Start() {
 			wt.serial.write("thread multi_light toggle")
 		case <-wt.quit:
 			read.Stop()
+			toggle.Stop()
 			return
 			// Lwait for events that needs to be transmitted
 		}
