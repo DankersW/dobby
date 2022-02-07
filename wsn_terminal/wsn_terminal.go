@@ -1,9 +1,7 @@
 package wsn_terminal
 
 import (
-	"strings"
 	"time"
-	"unicode"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -64,29 +62,4 @@ func (wt *wsnTerminal) Close() {
 	if err := wt.serial.close(); err != nil {
 		log.Errorf("failed to close serial terminal, %s", err)
 	}
-}
-
-func (wt *wsnTerminal) listen() {
-	rawData, err := wt.serial.read()
-	if err != nil {
-		log.Errorf("Received an error while reading from UART, %s", err)
-	}
-	if rawData == "" || strings.Contains(rawData, "uart:~$ ") {
-		return
-	}
-	data := cleanup(rawData)
-	log.Infof("Received: %q", data)
-}
-
-func cleanup(raw string) string {
-	clean := strings.Map(func(r rune) rune {
-		if unicode.IsGraphic(r) {
-			return r
-		}
-		return -1
-	}, raw)
-	if strings.HasPrefix(clean, "[8D[J") { // ALSO handle [21D[J
-		clean = strings.Replace(clean, "[8D[J", "", 1)
-	}
-	return clean
 }

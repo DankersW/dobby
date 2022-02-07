@@ -13,8 +13,6 @@ type uart struct {
 	mutex  sync.Mutex
 }
 
-// TODO: READ and write lock
-
 func newUartConnection(device string) (*uart, error) {
 	config := &serial.Config{
 		Name:        device,
@@ -40,7 +38,6 @@ func (u *uart) close() error {
 	return u.stream.Close()
 }
 
-// FIXME: sometimes this function really messes up
 func (u *uart) read() (string, error) {
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
@@ -50,8 +47,6 @@ func (u *uart) read() (string, error) {
 	}
 	return "", scanner.Err()
 }
-
-// TODO: READ and write lock
 
 func (u *uart) write(cmd string) {
 	u.mutex.Lock()
