@@ -79,7 +79,6 @@ func (wt *wsnTerminal) listen() {
 }
 
 func cleanup(raw string) string {
-	log.Infof("%q", raw)
 	clean := strings.Map(func(r rune) rune {
 		if unicode.IsGraphic(r) {
 			return r

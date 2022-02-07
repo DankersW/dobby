@@ -11,6 +11,8 @@ type uart struct {
 	stream *serial.Port
 }
 
+// TODO: READ and write lock
+
 func newUartConnection(device string) (*uart, error) {
 	config := &serial.Config{
 		Name:        device,
@@ -44,6 +46,8 @@ func (u *uart) read() (string, error) {
 	}
 	return "", scanner.Err()
 }
+
+// TODO: READ and write lock
 
 func (u *uart) write(cmd string) {
 	writer := bufio.NewWriter(u.stream)
