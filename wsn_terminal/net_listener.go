@@ -1,6 +1,7 @@
 package wsn_terminal
 
 import (
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -8,19 +9,17 @@ import (
 )
 
 const (
-	HEADER_CHARS  = ": "
-	DATA_SEP_CHAR = "|"
-	INDEX_MSG_ID  = 0
-	INDEX_DATA    = 1
-	INDEX_LENGHT  = 2
-	INDEX_IP      = 3
+	HEADER_CHARS   = ": "
+	DATA_SEP_CHAR  = "|"
+	INDEX_MSG_TYPE = 0
+	INDEX_DATA     = 1
+	INDEX_IP       = 2
 )
 
-type wsnNodeData struct {
-	msgId  int
-	data   []byte
-	lenght int
-	ip     string
+type wsnNodeMsg struct {
+	breed int
+	data  []byte
+	ip    string
 }
 
 // TODO: proto decoding
@@ -37,7 +36,11 @@ func (wt *wsnTerminal) listen() {
 	}
 	data := msgCleanup(rawData)
 	log.Infof("Received: %q", data)
-	wt.parseMsg(data)
+	msg := wt.parseMsg(data)
+	if len(msg.data) == 0 {
+		log.Debug("empty message")
+	}
+	log.Infof("Parsed: %v", msg)
 }
 
 // Move these to own file I tihnk
@@ -58,22 +61,31 @@ func msgCleanup(raw string) string {
 	return clean
 }
 
-func (wt *wsnTerminal) parseMsg(msg string) {
+func (wt *wsnTerminal) parseMsg(msg string) wsnNodeMsg {
 	headerIndex := strings.Index(msg, HEADER_CHARS)
 	if headerIndex < 0 {
 		log.Warnf("Received a bad msg: %q")
-		return
+		return wsnNodeMsg{}
 	}
 	data := msg[headerIndex+len(HEADER_CHARS):]
 	msgItems := strings.Split(data, DATA_SEP_CHAR)
 	if len(msgItems) <= 1 || len(msgItems) > 4 {
 		log.Warnf("No WSN Node data: %q", strings.Join(msgItems, ""))
-		return
+		return wsnNodeMsg{}
 	}
-
-	log.Infof("Parsed, ID: %s \t data: %s \t lenght: %s \t ip: %s", msgItems[INDEX_MSG_ID], msgItems[INDEX_DATA], msgItems[INDEX_LENGHT], msgItems[INDEX_IP])
+	return wsnNodeMsg{
+		breed: 0,
+		data:  str2byteSlice(msgItems[INDEX_DATA]),
+		ip:    msgItems[INDEX_IP+1],
+	}
 }
 
 func str2byteSlice(str string) []byte {
-
+	b := make([]byte, 0)
+	items := strings.Split(strings.Trim(str, " "), " ")
+	for _, item := range items {
+		i, _ := strconv.Atoi(item)
+		b = append(b, byte(i))
+	}
+	return b
 }
