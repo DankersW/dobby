@@ -40,6 +40,8 @@ func (wt *wsnTerminal) listen() {
 	wt.parseMsg(data)
 }
 
+// Move these to own file I tihnk
+
 func msgCleanup(raw string) string {
 	clean := strings.Map(func(r rune) rune {
 		if unicode.IsGraphic(r) {
@@ -70,4 +72,8 @@ func (wt *wsnTerminal) parseMsg(msg string) {
 	}
 
 	log.Infof("Parsed, ID: %s \t data: %s \t lenght: %s \t ip: %s", msgItems[INDEX_MSG_ID], msgItems[INDEX_DATA], msgItems[INDEX_LENGHT], msgItems[INDEX_IP])
+}
+
+func str2byteSlice(str string) []byte {
+
 }
