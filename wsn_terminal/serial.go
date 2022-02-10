@@ -32,6 +32,7 @@ func (u *uart) setup() {
 	u.write("shell echo off")
 	u.write("shell colors off")
 	u.write("clear")
+	u.write("thread monitor decode off")
 }
 
 func (u *uart) close() error {

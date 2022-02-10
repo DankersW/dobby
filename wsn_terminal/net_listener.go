@@ -74,9 +74,9 @@ func (wt *wsnTerminal) parseMsg(msg string) wsnNodeMsg {
 		return wsnNodeMsg{}
 	}
 	return wsnNodeMsg{
-		breed: 0,
+		breed: parseMsgBreed(msgItems[INDEX_MSG_TYPE]),
 		data:  str2byteSlice(msgItems[INDEX_DATA]),
-		ip:    msgItems[INDEX_IP+1],
+		ip:    msgItems[INDEX_IP],
 	}
 }
 
@@ -88,4 +88,12 @@ func str2byteSlice(str string) []byte {
 		b = append(b, byte(i))
 	}
 	return b
+}
+
+func parseMsgBreed(str string) int {
+	val, err := strconv.Atoi(strings.Trim(str, " "))
+	if err != nil {
+		log.Warnf("Failed to parse message type to int value, %s", err.Error())
+	}
+	return val
 }
