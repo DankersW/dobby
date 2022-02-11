@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
+	proto "github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,7 +26,6 @@ func (wt *wsnTerminal) listen() {
 	log.Infof("Received: %q", msgCleanup(rawData))
 	msg := wt.parseMsg(rawData)
 	if len(msg.data) == 0 {
-		log.Debug("empty message")
 		return
 	}
 	go wt.msgHandler(msg)
@@ -34,8 +34,17 @@ func (wt *wsnTerminal) listen() {
 func (wt *wsnTerminal) msgHandler(msg wsnNodeMsg) {
 	switch msg.breed {
 	case int(wsn.MessageType_SENSOR_DATA):
-		log.Info("handling Sensor")
+		sensorDataHandler(msg.data)
 	default:
 		log.Info("not sup")
 	}
+}
+
+func sensorDataHandler(data []byte) {
+	sensorData := &wsn.SensorData{}
+	if err := proto.Unmarshal(data, sensorData); err != nil {
+		log.Fatalln("Failed to parse address book:", err)
+	}
+
+	log.Infof("%v\n", sensorData)
 }
