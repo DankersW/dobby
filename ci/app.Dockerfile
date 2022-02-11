@@ -1,16 +1,15 @@
-FROM golang:1.16-alpine
-
-# Copy and download dependency using go mod
+FROM golang:1.16 as builder
 WORKDIR /build
 COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
-
-# Copy the code into the container
 COPY . .
+RUN go build -o dobby .
+
+FROM alpine:3.15.0
+RUN apk --no-cache add ca-certificates
+WORKDIR /app
+COPY --from=builder /build/dobby ./
 COPY ci/config.yml .
-RUN go build -o ./out/dobby .
 
-
-EXPOSE 3000
-ENTRYPOINT ["./out/dobby"]
+ENTRYPOINT ["./dobby"]
