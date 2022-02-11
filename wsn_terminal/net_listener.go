@@ -14,8 +14,6 @@ type wsnNodeMsg struct {
 	ip    string
 }
 
-// TODO: proto decoding
-// TODO: message decoding
 // TODO: Use a channel to pass data inbetween someone that needs it and the listner
 
 func (wt *wsnTerminal) listen() {
@@ -45,6 +43,5 @@ func sensorDataHandler(data []byte) {
 	if err := proto.Unmarshal(data, sensorData); err != nil {
 		log.Fatalln("Failed to parse address book:", err)
 	}
-
-	log.Infof("%v\n", sensorData)
+	log.Debugf("%v\n", sensorData)
 }
