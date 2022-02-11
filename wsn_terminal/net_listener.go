@@ -3,6 +3,7 @@ package wsn_terminal
 import (
 	"strings"
 
+	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,9 +28,14 @@ func (wt *wsnTerminal) listen() {
 		log.Debug("empty message")
 		return
 	}
-	wt.msgHandler(msg)
+	go wt.msgHandler(msg)
 }
 
 func (wt *wsnTerminal) msgHandler(msg wsnNodeMsg) {
-
+	switch msg.breed {
+	case int(wsn.MessageType_SENSOR_DATA):
+		log.Info("handling Sensor")
+	default:
+		log.Info("not sup")
+	}
 }

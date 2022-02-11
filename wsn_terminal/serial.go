@@ -49,7 +49,9 @@ func (u *uart) read() string {
 	for scanner.Scan() {
 		return scanner.Text()
 	}
-	log.Errorf("Received an error while reading from UART, %s", scanner.Err())
+	if scanner.Err() != nil {
+		log.Errorf("Received an error while reading from UART, %s", scanner.Err())
+	}
 	return ""
 }
 
