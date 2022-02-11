@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: "Checkout commit"
         uses: actions/checkout@v2
+      
+      - name: "checkout sub-modules"
+        run: git submodule update --init --recursive -j 8
 
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v1
