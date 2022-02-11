@@ -1,1 +1,3 @@
-# FIXME: prod config is needed
+wsn:
+  usb:
+    port: "/dev/ttyACM0"
