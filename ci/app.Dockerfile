@@ -8,9 +8,9 @@ RUN go mod download
 
 # Copy the code into the container
 COPY . .
-COPY docker/config.yml .
-RUN go build -o ./out/home-automation-backend .
+COPY ci/config.yml .
+RUN go build -o ./out/dobby .
 
 
 EXPOSE 3000
-ENTRYPOINT ["./out/home-automation-backend"]
+ENTRYPOINT ["./out/dobby"]
