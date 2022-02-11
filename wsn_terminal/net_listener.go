@@ -17,10 +17,7 @@ type wsnNodeMsg struct {
 // TODO: Use a channel to pass data inbetween someone that needs it and the listner
 
 func (wt *wsnTerminal) listen() {
-	rawData, err := wt.serial.read()
-	if err != nil {
-		log.Errorf("Received an error while reading from UART, %s", err)
-	}
+	rawData := wt.serial.read()
 	if rawData == "" || strings.Contains(rawData, "uart:~$ ") {
 		return
 	}
@@ -28,6 +25,11 @@ func (wt *wsnTerminal) listen() {
 	msg := wt.parseMsg(rawData)
 	if len(msg.data) == 0 {
 		log.Debug("empty message")
+		return
 	}
-	log.Infof("Parsed: %v", msg)
+	wt.msgHandler(msg)
+}
+
+func (wt *wsnTerminal) msgHandler(msg wsnNodeMsg) {
+
 }

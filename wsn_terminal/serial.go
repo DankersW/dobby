@@ -42,14 +42,15 @@ func (u *uart) close() error {
 	return u.stream.Close()
 }
 
-func (u *uart) read() (string, error) {
+func (u *uart) read() string {
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
 	scanner := bufio.NewScanner(u.stream)
 	for scanner.Scan() {
-		return scanner.Text(), nil
+		return scanner.Text()
 	}
-	return "", scanner.Err()
+	log.Errorf("Received an error while reading from UART, %s", scanner.Err())
+	return ""
 }
 
 func (u *uart) write(cmd string) {

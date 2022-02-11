@@ -13,7 +13,6 @@ const (
 type wsnTerminal struct {
 	serial *uart
 	quit   chan bool
-	// TODO: handlers to call on a certain type of message
 }
 
 type WsnTerminal interface {
