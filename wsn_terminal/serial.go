@@ -3,6 +3,7 @@ package wsn_terminal
 import (
 	"bufio"
 	"sync"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
@@ -28,11 +29,13 @@ func newUartConnection(device string) (*uart, error) {
 }
 
 func (u *uart) setup() {
-	u.write("")
-	u.write("shell echo off")
-	u.write("shell colors off")
-	u.write("clear")
-	u.write("thread monitor decode off")
+	cmds := []string{"", "shell echo off", "shell colors off", "clear", "thread monitor decode off"}
+	for _, cmd := range cmds {
+		u.write(cmd)
+		time.Sleep(1 * time.Millisecond)
+	}
+	time.Sleep(10 * time.Millisecond)
+	log.Info("Serial setup done")
 }
 
 func (u *uart) close() error {
