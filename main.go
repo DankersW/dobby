@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/DankersW/dobby/config"
 	"github.com/DankersW/dobby/kafka"
 	"github.com/DankersW/dobby/wsn_terminal"
@@ -13,7 +15,11 @@ func main() {
 	stage := "test"
 
 	if stage == "test" {
-		kafka.NewConsumer()
+		go kafka.NewConsumer()
+		for {
+			kafka.NewProducer()
+			time.Sleep(2 * time.Second)
+		}
 	} else {
 		term, err := wsn_terminal.New(config.Wsn.Usb.Port)
 		if err != nil {

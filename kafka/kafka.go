@@ -58,3 +58,33 @@ func NewConsumer() {
 		panic(err)
 	}
 }
+
+func NewProducer() {
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Retry.Max = 5
+
+	brokers := []string{"localhost:29092"}
+	producer, err := sarama.NewSyncProducer(brokers, config)
+	if err != nil {
+		log.Errorf("connection error, %s", err)
+		return
+	}
+
+	defer producer.Close()
+
+	topic := "test"
+	message := "hello?"
+	msg := &sarama.ProducerMessage{
+		Topic: topic,
+		Value: sarama.StringEncoder(message),
+	}
+
+	partition, offset, err := producer.SendMessage(msg)
+	if err != nil {
+		log.Error(err)
+	}
+
+	fmt.Printf("Message is stored in topic(%s)/partition(%d)/offset(%d)\n", topic, partition, offset)
+}
