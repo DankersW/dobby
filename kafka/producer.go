@@ -4,6 +4,8 @@ import "github.com/Shopify/sarama"
 
 func producerConfig() *sarama.Config {
 	config := sarama.NewConfig()
-	config.Consumer.Return.Errors = true
+	config.Producer.Return.Successes = true
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Retry.Max = 5
 	return config
 }
