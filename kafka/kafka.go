@@ -11,8 +11,7 @@ import (
 )
 
 func NewConsumer() {
-	config := sarama.NewConfig()
-	config.Consumer.Return.Errors = true
+	config := consumerConfig()
 
 	brokers := []string{"localhost:29092"}
 	conn, err := sarama.NewConsumer(brokers, config)
@@ -60,10 +59,7 @@ func NewConsumer() {
 }
 
 func NewProducer() {
-	config := sarama.NewConfig()
-	config.Producer.Return.Successes = true
-	config.Producer.RequiredAcks = sarama.WaitForAll
-	config.Producer.Retry.Max = 5
+	config := producerConfig()
 
 	brokers := []string{"localhost:29092"}
 	producer, err := sarama.NewSyncProducer(brokers, config)
