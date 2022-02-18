@@ -15,7 +15,14 @@ func main() {
 	stage := "test"
 
 	if stage == "test" {
-		go kafka.NewConsumer()
+		brokers := []string{"localhost:29092"}
+		topics := []string{"test"}
+		exit := make(chan bool)
+		consumer, err := kafka.NewConsumer(brokers, topics, exit)
+		if err != nil {
+			log.Panic(err)
+		}
+		go consumer.Serve()
 		for {
 			kafka.NewProducer()
 			time.Sleep(2 * time.Second)
