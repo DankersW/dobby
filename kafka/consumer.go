@@ -56,13 +56,12 @@ func (c *consumer) listen(consumer sarama.PartitionConsumer) {
 		case err := <-consumer.Errors():
 			log.Errorf("received error on topic %q, err: %s", err.Topic, err.Err)
 		case msg := <-consumer.Messages():
-			log.Infof("Received message Count %d: | Topic(%s) | Message(%s) \n", 0, string(msg.Topic), string(msg.Value))
+			log.Infof("Received message on topic %q: %s", string(msg.Topic), string(msg.Value))
 		case <-c.exit:
 			log.Info("Closing the consumer")
+			return
 		}
-
 	}
-
 }
 
 func (c *consumer) Close() {

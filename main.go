@@ -32,6 +32,7 @@ func main() {
 			case <-publish.C:
 				kafka.NewProducer()
 			case <-close.C:
+				log.Info("closing all consumers")
 				exit <- true
 				break
 			}
