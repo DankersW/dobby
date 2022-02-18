@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewConsumer() {
+func NewConsumer_() {
 	config := consumerConfig()
 
 	brokers := []string{"localhost:29092"}
