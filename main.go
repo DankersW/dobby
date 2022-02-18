@@ -23,9 +23,18 @@ func main() {
 			log.Panic(err)
 		}
 		go consumer.Serve()
+
+		publish := time.NewTicker(time.Duration(2) * time.Second)
+		close := time.NewTicker(time.Duration(25) * time.Second)
+
 		for {
-			kafka.NewProducer()
-			time.Sleep(2 * time.Second)
+			select {
+			case <-publish.C:
+				kafka.NewProducer()
+			case <-close.C:
+				exit <- true
+				break
+			}
 		}
 	} else {
 		term, err := wsn_terminal.New(config.Wsn.Usb.Port)
