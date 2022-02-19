@@ -13,15 +13,13 @@ func main() {
 	config := config.Get()
 
 	stage := "test"
-
 	if stage == "test" {
 		exit := make(chan bool)
 		brokers := []string{"localhost:29092"}
 		topics := []string{"test"}
-		groupId := "dobby"
-		consumer, err := kafka.NewConsumer(brokers, groupId, topics, exit)
+		consumer, err := kafka.NewConsumer(brokers, topics)
 		if err != nil {
-			log.Error(err)
+			log.Panicf("failed to setup kafka consumer, %s", err.Error())
 		}
 		go consumer.Serve()
 		/*
