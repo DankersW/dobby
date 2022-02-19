@@ -11,12 +11,12 @@ type consumer struct {
 	topicConsumers map[string]sarama.PartitionConsumer
 }
 
-type Consumer interface {
+type Consumer_ interface {
 	Serve()
 	Close()
 }
 
-func NewConsumer(brokers []string, topics []string, exit chan bool) (Consumer, error) {
+func NewConsumer(brokers []string, topics []string, exit chan bool) (Consumer_, error) {
 	config := consumerConfig()
 
 	conn, err := sarama.NewConsumer(brokers, config)
@@ -75,7 +75,7 @@ func (c *consumer) Close() {
 func consumerConfig() *sarama.Config {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
-	config.ClientID = "Dobby-consumers"
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	//config.ClientID = "Dobby-consumers"
+	//config.Consumer.Offsets.Initial = sarama.OffsetNewest
 	return config
 }

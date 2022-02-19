@@ -15,17 +15,20 @@ func main() {
 	stage := "test"
 
 	if stage == "test" {
-		brokers := []string{"localhost:29092"}
-		topics := []string{"test"}
 		exit := make(chan bool)
-		consumer, err := kafka.NewConsumer(brokers, topics, exit)
-		if err != nil {
-			log.Panic(err)
-		}
-		go consumer.Serve()
-
+		go kafka.Cons()
+		/*
+			brokers := []string{"localhost:29092"}
+			topics := []string{"test"}
+			exit := make(chan bool)
+			consumer, err := kafka.NewConsumer(brokers, topics, exit)
+			if err != nil {
+				log.Panic(err)
+			}
+			go consumer.Serve()
+		*/
 		publish := time.NewTicker(time.Duration(10) * time.Second)
-		close := time.NewTicker(time.Duration(25) * time.Second)
+		close := time.NewTicker(time.Duration(250) * time.Second)
 
 		for {
 			select {
