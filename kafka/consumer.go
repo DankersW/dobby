@@ -25,13 +25,15 @@ func NewConsumer(brokers []string, topics []string, exit chan bool) (Consumer, e
 	}
 
 	tcs := make(map[string]sarama.PartitionConsumer)
-	for _, topic := range topics {
-		tc, err := conn.ConsumePartition(topic, 0, sarama.OffsetOldest)
-		if err != nil {
-			return nil, err
+	/*
+		for _, topic := range topics {
+			tc, err := conn.ConsumePartition(topic, 0, sarama.OffsetOldest)
+			if err != nil {
+				return nil, err
+			}
+			tcs[topic] = tc
 		}
-		tcs[topic] = tc
-	}
+	*/
 
 	c := &consumer{
 		conn:           conn,
