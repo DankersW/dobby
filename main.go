@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/DankersW/dobby/config"
@@ -12,36 +15,31 @@ import (
 func main() {
 	config := config.Get()
 
+	mainCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	stage := "test"
 	if stage == "test" {
-		exit := make(chan bool)
 		brokers := []string{"localhost:29092"}
 		topics := []string{"test"}
 		consumer, err := kafka.NewConsumer(brokers, topics)
 		if err != nil {
 			log.Panicf("failed to setup kafka consumer, %s", err.Error())
 		}
-		go consumer.Serve()
-		/*
-			brokers := []string{"localhost:29092"}
-			topics := []string{"test"}
-			exit := make(chan bool)
-			consumer, err := kafka.NewConsumer(brokers, topics, exit)
-			if err != nil {
-				log.Panic(err)
-			}
-			go consumer.Serve()
-		*/
+		go consumer.Serve(mainCtx)
+
 		publish := time.NewTicker(time.Duration(10) * time.Second)
-		close := time.NewTicker(time.Duration(250) * time.Second)
+		close := time.NewTicker(time.Duration(25) * time.Second)
 
 		for {
 			select {
 			case <-publish.C:
 				kafka.NewProducer()
 			case <-close.C:
-				log.Info("closing all consumers")
-				exit <- true
+				log.Info("closing consumer")
+				cancel()
+				consumer.Close()
+				publish.Stop()
 				break
 			}
 		}
@@ -52,5 +50,12 @@ func main() {
 		}
 		term.Start()
 	}
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+
+	//consumer.Close()
+	mainCtx.Done()
 
 }
