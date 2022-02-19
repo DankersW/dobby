@@ -73,5 +73,7 @@ func (c *consumer) Close() {
 func consumerConfig() *sarama.Config {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
+	config.ClientID = "Dobby-consumers"
+	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 	return config
 }

@@ -24,7 +24,7 @@ func main() {
 		}
 		go consumer.Serve()
 
-		publish := time.NewTicker(time.Duration(2) * time.Second)
+		publish := time.NewTicker(time.Duration(10) * time.Second)
 		close := time.NewTicker(time.Duration(25) * time.Second)
 
 		for {

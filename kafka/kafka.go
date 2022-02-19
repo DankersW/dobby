@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -71,7 +72,7 @@ func NewProducer() {
 	defer producer.Close()
 
 	topic := "test"
-	message := "hello?"
+	message := fmt.Sprintf("hello- %s", time.Now())
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.StringEncoder(message),
