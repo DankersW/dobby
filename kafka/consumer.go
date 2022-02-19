@@ -1,49 +1,64 @@
 package kafka
 
 import (
+	"context"
+
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 )
 
 type consumer struct {
-	exit           chan bool
-	conn           sarama.Consumer
-	topicConsumers map[string]sarama.PartitionConsumer
+	ctx    context.Context
+	client sarama.ConsumerGroup
+	topics []string
 }
 
-type Consumer_ interface {
+type Consumer interface {
 	Serve()
-	Close()
 }
 
-func NewConsumer(brokers []string, topics []string, exit chan bool) (Consumer_, error) {
+func NewConsumer(brokers []string, groupId string, topics []string, exit chan bool) (Consumer, error) {
 	config := consumerConfig()
 
-	conn, err := sarama.NewConsumer(brokers, config)
+	ctx, _ := context.WithCancel(context.Background())
+
+	client, err := sarama.NewConsumerGroup(brokers, groupId, config)
 	if err != nil {
-		return nil, err
+		log.Panicf("Error creating consumer group client: %v", err)
 	}
 
-	tcs := make(map[string]sarama.PartitionConsumer)
-	/*
-		for _, topic := range topics {
-			tc, err := conn.ConsumePartition(topic, 0, sarama.OffsetOldest)
-			if err != nil {
-				return nil, err
-			}
-			tcs[topic] = tc
-		}
-	*/
-
-	c := &consumer{
-		conn:           conn,
-		exit:           exit,
-		topicConsumers: tcs,
+	consumer := &consumer{
+		ctx:    ctx,
+		client: client,
+		topics: topics,
 	}
-	return c, nil
+
+	log.Println("Sarama consumer up and running!...")
+
+	return consumer, nil
 }
 
 func (c *consumer) Serve() {
+	for {
+		if err := c.client.Consume(c.ctx, c.topics, c); err != nil {
+			log.Panicf("Error from consumer: %v", err)
+		}
+		// check if context was cancelled, signaling that the consumer should stop
+		if c.ctx.Err() != nil {
+			return
+		}
+	}
+}
+
+func (c *consumer) Close() {
+	log.Info("Close")
+	//TODO: cancel context
+	//err := c.conn.Close()
+	//log.Infof("Close error: %s", err.Error())
+}
+
+/*
+func (c *Consumer) Serve() {
 	log.Info("Serve")
 
 	for topic, consumer := range c.topicConsumers {
@@ -71,11 +86,39 @@ func (c *consumer) Close() {
 	err := c.conn.Close()
 	log.Infof("Close error: %s", err.Error())
 }
-
+*/
 func consumerConfig() *sarama.Config {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
-	//config.ClientID = "Dobby-consumers"
-	//config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+	config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	version, err := sarama.ParseKafkaVersion("2.1.1") // FIXME: get real value here
+	if err != nil {
+		log.Panicf("Error parsing Kafka version: %v", err)
+	}
+	config.Version = version
 	return config
+}
+
+////
+
+// Setup is run at the beginning of a new session, before ConsumeClaim
+func (c *consumer) Setup(sarama.ConsumerGroupSession) error {
+	log.Info("Kafka consumer is setup")
+	return nil
+}
+
+// Cleanup is run at the end of a session, once all ConsumeClaim goroutines have exited
+func (c *consumer) Cleanup(sarama.ConsumerGroupSession) error {
+	return nil
+}
+
+// ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
+func (c *consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	for message := range claim.Messages() {
+		log.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(message.Value), message.Timestamp, message.Topic)
+		session.MarkMessage(message, "")
+	}
+
+	return nil
 }

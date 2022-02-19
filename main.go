@@ -16,7 +16,14 @@ func main() {
 
 	if stage == "test" {
 		exit := make(chan bool)
-		go kafka.Cons()
+		brokers := []string{"localhost:29092"}
+		topics := []string{"test"}
+		groupId := "dobby"
+		consumer, err := kafka.NewConsumer(brokers, groupId, topics, exit)
+		if err != nil {
+			log.Error(err)
+		}
+		go consumer.Serve()
 		/*
 			brokers := []string{"localhost:29092"}
 			topics := []string{"test"}
