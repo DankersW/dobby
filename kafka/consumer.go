@@ -60,7 +60,6 @@ func (c *consumer) Serve(ctx context.Context) {
 }
 
 func (c *consumer) Close() {
-	log.Info("Close")
 	c.client.Close()
 }
 
@@ -72,7 +71,6 @@ func (c *consumer) Setup(sarama.ConsumerGroupSession) error {
 
 // Cleanup is run at the end of a session, once all ConsumeClaim goroutines have exited
 func (c *consumer) Cleanup(sarama.ConsumerGroupSession) error {
-	log.Info("Cleaning up Kafka consumer")
 	return nil
 }
 
