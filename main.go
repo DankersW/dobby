@@ -12,6 +12,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// TODO: get the log level from config file so that prod docker only prints Warning msgs
+
 func main() {
 	config := config.Get()
 
