@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewProducer() {
+func NewProducer_() {
 	config := producerConfig()
 
 	brokers := []string{"localhost:29092"}

@@ -34,6 +34,12 @@ func main() {
 			log.Errorf("Failed to setup kafka consumer, %s", err.Error())
 			return
 		}
+		producer, err := kafka.NewProducer(brokers)
+		if err != nil {
+			log.Errorf("Failed to setup kafka producer, %s", err.Error())
+			return
+		}
+		log.Info("Kafka good")
 		go consumer.Serve(mainCtx)
 
 		publish := time.NewTicker(time.Duration(10) * time.Second)
@@ -42,7 +48,7 @@ func main() {
 		for {
 			select {
 			case <-publish.C:
-				kafka.NewProducer()
+				producer.Send("test", []byte("hi a msg"))
 			case <-close.C:
 				log.Info("closing consumer")
 				cancel()
@@ -50,7 +56,7 @@ func main() {
 				publish.Stop()
 				break
 			case msg := <-testTopic:
-				log.Info("receveid msg on test topic: %s", string(msg))
+				log.Infof("receveid msg on test topic: %s", string(msg))
 			}
 
 		}
