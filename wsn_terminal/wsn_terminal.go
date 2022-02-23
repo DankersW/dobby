@@ -12,14 +12,17 @@ const (
 )
 
 type wsnTerminal struct {
-	serial *uart
-	quit   chan bool
+	serial  *uart
+	quit    chan bool
+	txQueue chan []byte
 }
 
 type WsnTerminal interface {
 	Start()
 	Close()
 }
+
+// TODO: from the handlers push data (topic, msg) onto a channel, then from kafka producer activly wait to transmit data
 
 func New(port string) (WsnTerminal, error) {
 	serialTerm, err := newUartConnection(port)
@@ -33,6 +36,9 @@ func New(port string) (WsnTerminal, error) {
 	}
 	return wt, nil
 }
+
+// FIXME: make a mechanism between wns and serial that let's wsn know when it can send data,
+// FIXME: sometimes it happens that the RX buffer is full when we want to write making us lose data
 
 func (wt *wsnTerminal) Start() {
 	wt.serial.setup()

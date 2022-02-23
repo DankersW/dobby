@@ -6,7 +6,6 @@ import (
 	"os/signal"
 
 	"github.com/DankersW/dobby/config"
-	"github.com/DankersW/dobby/kafka"
 	"github.com/DankersW/dobby/wsn_terminal"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,7 +18,7 @@ func main() {
 	mainCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	kafka.Example()
+	//kafka.Example()
 
 	log.Info("Starting WSN terminal CLI")
 	term, err := wsn_terminal.New(config.Wsn.Usb.Port)

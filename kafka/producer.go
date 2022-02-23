@@ -40,6 +40,8 @@ func (p *producer) Shutdown() error {
 	return p.syncProducer.Close()
 }
 
+// TODO: make something like a txQueue that listen for a channel and tramisits the data when it's there
+
 func (p *producer) Send(topic string, data []byte) error {
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
