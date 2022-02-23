@@ -1,6 +1,7 @@
 package wsn_terminal
 
 import (
+	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -23,8 +24,7 @@ type WsnTerminal interface {
 func New(port string) (WsnTerminal, error) {
 	serialTerm, err := newUartConnection(port)
 	if err != nil {
-		log.Errorf("Failed to open Serial connection to WSN gateway, %s", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("failed to open Serial connection to WSN gateway, %s", err.Error())
 	}
 
 	wt := &wsnTerminal{

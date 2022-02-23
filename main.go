@@ -24,7 +24,7 @@ func main() {
 	log.Info("Starting WSN terminal CLI")
 	term, err := wsn_terminal.New(config.Wsn.Usb.Port)
 	if err != nil {
-		log.Fatalf("Terminal failed to setup: %s", err.Error())
+		log.Fatalf("WSN terminal CLI failed to setup: %s", err.Error())
 	}
 	term.Start()
 
