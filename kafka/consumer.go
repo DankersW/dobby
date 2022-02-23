@@ -7,9 +7,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type MsgCallback chan []byte
+
 type consumer struct {
 	client sarama.ConsumerGroup
-	topics []string
+	topics map[string]MsgCallback
 }
 
 type Consumer interface {
@@ -17,7 +19,7 @@ type Consumer interface {
 	Close()
 }
 
-func NewConsumer(brokers []string, topics []string) (Consumer, error) {
+func NewConsumer(brokers []string, topics map[string]MsgCallback) (Consumer, error) {
 	config, err := consumerConfig()
 	if err != nil {
 		return nil, err
@@ -49,8 +51,9 @@ func consumerConfig() (*sarama.Config, error) {
 }
 
 func (c *consumer) Serve(ctx context.Context) {
+	topics := keysFromMap(c.topics)
 	for {
-		if err := c.client.Consume(ctx, c.topics, c); err != nil {
+		if err := c.client.Consume(ctx, topics, c); err != nil {
 			log.Panicf("Error from consumer: %v", err)
 		}
 		if ctx.Err() != nil {
@@ -78,7 +81,19 @@ func (c *consumer) Cleanup(sarama.ConsumerGroupSession) error {
 func (c *consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
 		log.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(message.Value), message.Timestamp, message.Topic)
+		c.topics[message.Topic] <- message.Value
 		session.MarkMessage(message, "")
 	}
 	return nil
+}
+
+func keysFromMap(m map[string]MsgCallback) []string {
+	keys := make([]string, len(m))
+
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	return keys
 }

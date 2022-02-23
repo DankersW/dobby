@@ -20,11 +20,17 @@ func main() {
 
 	stage := "test"
 	if stage == "test" {
+
+		testTopic := make(kafka.MsgCallback)
+
 		brokers := []string{"localhost:29092"}
-		topics := []string{"test"}
+		topics := map[string]kafka.MsgCallback{
+			"test": testTopic,
+		}
 		consumer, err := kafka.NewConsumer(brokers, topics)
 		if err != nil {
-			log.Panicf("failed to setup kafka consumer, %s", err.Error())
+			log.Errorf("Failed to setup kafka consumer, %s", err.Error())
+			return
 		}
 		go consumer.Serve(mainCtx)
 
@@ -41,7 +47,10 @@ func main() {
 				consumer.Close()
 				publish.Stop()
 				break
+			case msg := <-testTopic:
+				log.Info("receveid msg on test topic: %s", string(msg))
 			}
+
 		}
 	} else {
 		term, err := wsn_terminal.New(config.Wsn.Usb.Port)
@@ -55,7 +64,6 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 
-	//consumer.Close()
 	mainCtx.Done()
 
 }
