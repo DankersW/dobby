@@ -1,36 +1,59 @@
 package kafka
 
 import (
-	"fmt"
+	"context"
 	"time"
 
-	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 )
 
-func NewProducer_() {
-	config := producerConfig()
+func Example() {
+	mainCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
+	// Topic setup for consumer callback
+	testTopicClb := make(MsgCallback)
+	topics := map[string]MsgCallback{
+		"test": testTopicClb,
+	}
 	brokers := []string{"localhost:29092"}
-	producer, err := sarama.NewSyncProducer(brokers, config)
+
+	// Producer
+	producer, err := NewProducer(brokers)
 	if err != nil {
-		log.Errorf("connection error, %s", err)
+		log.Fatalf("Failed to setup kafka producer, %s", err.Error())
 		return
 	}
 
-	defer producer.Close()
-
-	topic := "test"
-	message := fmt.Sprintf("hello- %s", time.Now())
-	msg := &sarama.ProducerMessage{
-		Topic: topic,
-		Value: sarama.StringEncoder(message),
-	}
-
-	partition, offset, err := producer.SendMessage(msg)
+	// Consumer
+	consumer, err := NewConsumer(brokers, topics)
 	if err != nil {
-		log.Error(err)
+		log.Fatalf("Failed to setup kafka consumer, %s", err.Error())
 	}
+	go consumer.Serve(mainCtx)
 
-	fmt.Printf("Message is stored in topic(%s)/partition(%d)/offset(%d)\n", topic, partition, offset)
+	// Main loop
+	running := true
+	publish := time.NewTicker(time.Duration(3) * time.Second)
+	close := time.NewTicker(time.Duration(10) * time.Second)
+	for running {
+		select {
+		case <-publish.C:
+			producer.Send("test", []byte("hi a msg"))
+		case <-close.C:
+			log.Info("stopping")
+			running = false
+			publish.Stop()
+			close.Stop()
+		case msg := <-testTopicClb:
+			log.Infof("receveid msg | test: %s", string(msg))
+		}
+	}
+	cancel()
+	producer.Shutdown()
+	consumer.Close()
+	log.Info("apps closed")
+
+	mainCtx.Done()
+	log.Info("all done!")
 }
