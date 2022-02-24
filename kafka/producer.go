@@ -4,10 +4,17 @@ import (
 	"fmt"
 
 	"github.com/Shopify/sarama"
+	log "github.com/sirupsen/logrus"
 )
+
+type KafkaTxQueue struct {
+	Topic string
+	data  []byte
+}
 
 type producer struct {
 	syncProducer sarama.SyncProducer
+	txQueue      chan KafkaTxQueue
 }
 
 type Producer interface {
@@ -49,4 +56,16 @@ func (p *producer) Send(topic string, data []byte) error {
 	}
 	_, _, err := p.syncProducer.SendMessage(msg)
 	return err
+}
+
+func (p *producer) Serve() error {
+	// TODO: Close the endless loop
+	for {
+		select {
+		case msg := <-p.txQueue:
+			log.Info(msg.Topic)
+
+		}
+	}
+	return nil
 }
