@@ -19,10 +19,11 @@ type producer struct {
 
 type Producer interface {
 	Send(topic string, data []byte) error
+	Serve() error
 	Shutdown() error
 }
 
-func NewProducer(brokers []string) (Producer, error) {
+func NewProducer(brokers []string, queue chan KafkaTxQueue) (Producer, error) {
 	config := producerConfig()
 	syncPoducer, err := sarama.NewSyncProducer(brokers, config)
 	if err != nil {
@@ -31,6 +32,7 @@ func NewProducer(brokers []string) (Producer, error) {
 
 	producer := &producer{
 		syncProducer: syncPoducer,
+		txQueue:      queue,
 	}
 	return producer, nil
 }
@@ -60,11 +62,11 @@ func (p *producer) Send(topic string, data []byte) error {
 
 func (p *producer) Serve() error {
 	// TODO: Close the endless loop
+	log.Info("looping")
 	for {
 		select {
 		case msg := <-p.txQueue:
 			log.Info(msg.Topic)
-
 		}
 	}
 	return nil

@@ -19,11 +19,14 @@ func Example() {
 	brokers := []string{"localhost:29092"}
 
 	// Producer
-	producer, err := NewProducer(brokers)
+	queueSize := 20
+	txQueue := make(chan KafkaTxQueue, queueSize)
+	producer, err := NewProducer(brokers, txQueue)
 	if err != nil {
 		log.Fatalf("Failed to setup kafka producer, %s", err.Error())
 		return
 	}
+	go producer.Serve()
 
 	// Consumer
 	consumer, err := NewConsumer(brokers, topics)
@@ -39,6 +42,8 @@ func Example() {
 	for running {
 		select {
 		case <-publish.C:
+			msg := KafkaTxQueue{Topic: "test", data: []byte("something")}
+			txQueue <- msg
 			producer.Send("test", []byte("hi a msg"))
 		case <-close.C:
 			log.Info("stopping")
