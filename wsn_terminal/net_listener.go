@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
+	"github.com/DankersW/dobby/kafka"
 	proto "github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 )
@@ -32,16 +33,21 @@ func (wt *wsnTerminal) listen() {
 func (wt *wsnTerminal) msgHandler(msg wsnNodeMsg) {
 	switch msg.breed {
 	case int(wsn.MessageType_SENSOR_DATA):
-		sensorDataHandler(msg.data)
+		wt.sensorDataHandler(msg.data)
 	default:
 		log.Info("not sup")
 	}
 }
 
-func sensorDataHandler(data []byte) {
+func (wt *wsnTerminal) sensorDataHandler(data []byte) {
 	sensorData := &wsn.SensorData{}
 	if err := proto.Unmarshal(data, sensorData); err != nil {
 		log.Fatalln("Failed to parse address book:", err)
 	}
 	log.Debugf("%v\n", sensorData)
+	txItem := kafka.KafkaTxQueue{
+		Topic: "wsn/sensor_data",
+		data:  data,
+	}
+	wt.ipcTxQueue <- txItem
 }

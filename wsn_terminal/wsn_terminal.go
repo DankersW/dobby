@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DankersW/dobby/kafka"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -12,9 +13,9 @@ const (
 )
 
 type wsnTerminal struct {
-	serial  *uart
-	quit    chan bool
-	txQueue chan []byte
+	serial     *uart
+	quit       chan bool
+	ipcTxQueue chan kafka.KafkaTxQueue
 }
 
 type WsnTerminal interface {
@@ -24,15 +25,16 @@ type WsnTerminal interface {
 
 // TODO: from the handlers push data (topic, msg) onto a channel, then from kafka producer activly wait to transmit data
 
-func New(port string) (WsnTerminal, error) {
+func New(port string, ipcTxQueue chan kafka.KafkaTxQueue) (WsnTerminal, error) {
 	serialTerm, err := newUartConnection(port)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open Serial connection to WSN gateway, %s", err.Error())
 	}
 
 	wt := &wsnTerminal{
-		serial: serialTerm,
-		quit:   make(chan bool),
+		serial:     serialTerm,
+		quit:       make(chan bool),
+		ipcTxQueue: ipcTxQueue,
 	}
 	return wt, nil
 }
