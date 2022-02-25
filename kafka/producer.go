@@ -49,8 +49,6 @@ func (p *producer) Shutdown() error {
 	return p.syncProducer.Close()
 }
 
-// TODO: make something like a txQueue that listen for a channel and tramisits the data when it's there
-
 func (p *producer) Send(topic string, data []byte) error {
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
@@ -63,10 +61,9 @@ func (p *producer) Send(topic string, data []byte) error {
 func (p *producer) Serve() error {
 	// TODO: Close the endless loop
 	log.Info("looping")
-	for {
-		select {
-		case msg := <-p.txQueue:
-			log.Info(msg.Topic)
+	for msg := range p.txQueue {
+		if err := p.Send(msg.Topic, msg.data); err != nil {
+			log.Errorf("Failed to send msg on topic %q, %s", msg.Topic, err.Error())
 		}
 	}
 	return nil
