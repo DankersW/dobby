@@ -19,7 +19,7 @@ type producer struct {
 
 type Producer interface {
 	Send(topic string, data []byte) error
-	Serve() error
+	Serve()
 	Shutdown() error
 }
 
@@ -58,13 +58,10 @@ func (p *producer) Send(topic string, data []byte) error {
 	return err
 }
 
-func (p *producer) Serve() error {
-	// TODO: Close the endless loop
-	log.Info("looping")
+func (p *producer) Serve() {
 	for msg := range p.txQueue {
 		if err := p.Send(msg.Topic, msg.data); err != nil {
 			log.Errorf("Failed to send msg on topic %q, %s", msg.Topic, err.Error())
 		}
 	}
-	return nil
 }
