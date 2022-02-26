@@ -9,7 +9,7 @@ import (
 
 type KafkaTxQueue struct {
 	Topic string
-	data  []byte
+	Data  []byte
 }
 
 type producer struct {
@@ -60,7 +60,7 @@ func (p *producer) Send(topic string, data []byte) error {
 
 func (p *producer) Serve() {
 	for msg := range p.txQueue {
-		if err := p.Send(msg.Topic, msg.data); err != nil {
+		if err := p.Send(msg.Topic, msg.Data); err != nil {
 			log.Errorf("Failed to send msg on topic %q, %s", msg.Topic, err.Error())
 		}
 	}

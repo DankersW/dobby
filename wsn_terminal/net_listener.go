@@ -45,9 +45,10 @@ func (wt *wsnTerminal) sensorDataHandler(data []byte) {
 		log.Fatalln("Failed to parse address book:", err)
 	}
 	log.Debugf("%v\n", sensorData)
+	// TODO: parse recieved data to a differnt data format
 	txItem := kafka.KafkaTxQueue{
 		Topic: "wsn/sensor_data",
-		data:  data,
+		Data:  data,
 	}
 	wt.ipcTxQueue <- txItem
 }
