@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
+	"github.com/DankersW/dobby/kafka"
 	proto "github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 )
@@ -13,8 +14,6 @@ type wsnNodeMsg struct {
 	data  []byte
 	ip    string
 }
-
-// TODO: Use a channel to pass data inbetween someone that needs it and the listner
 
 func (wt *wsnTerminal) listen() {
 	rawData := wt.serial.read()
@@ -32,16 +31,22 @@ func (wt *wsnTerminal) listen() {
 func (wt *wsnTerminal) msgHandler(msg wsnNodeMsg) {
 	switch msg.breed {
 	case int(wsn.MessageType_SENSOR_DATA):
-		sensorDataHandler(msg.data)
+		wt.sensorDataHandler(msg.data)
 	default:
-		log.Info("not sup")
+		log.Info("not known type")
 	}
 }
 
-func sensorDataHandler(data []byte) {
+func (wt *wsnTerminal) sensorDataHandler(data []byte) {
 	sensorData := &wsn.SensorData{}
 	if err := proto.Unmarshal(data, sensorData); err != nil {
 		log.Fatalln("Failed to parse address book:", err)
 	}
 	log.Debugf("%v\n", sensorData)
+	// TODO: parse recieved data to a differnt data format
+	txItem := kafka.KafkaTxQueue{
+		Topic: "wsn/sensor_data",
+		Data:  data,
+	}
+	wt.ipcTxQueue <- txItem
 }

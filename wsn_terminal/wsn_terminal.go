@@ -1,8 +1,10 @@
 package wsn_terminal
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/DankersW/dobby/kafka"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -11,8 +13,9 @@ const (
 )
 
 type wsnTerminal struct {
-	serial *uart
-	quit   chan bool
+	serial     *uart
+	quit       chan bool
+	ipcTxQueue chan kafka.KafkaTxQueue
 }
 
 type WsnTerminal interface {
@@ -20,19 +23,24 @@ type WsnTerminal interface {
 	Close()
 }
 
-func New(port string) (WsnTerminal, error) {
+// TODO: from the handlers push data (topic, msg) onto a channel, then from kafka producer activly wait to transmit data
+
+func New(port string, ipcTxQueue chan kafka.KafkaTxQueue) (WsnTerminal, error) {
 	serialTerm, err := newUartConnection(port)
 	if err != nil {
-		log.Errorf("Failed to open Serial connection to WSN gateway, %s", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("failed to open Serial connection to WSN gateway, %s", err.Error())
 	}
 
 	wt := &wsnTerminal{
-		serial: serialTerm,
-		quit:   make(chan bool),
+		serial:     serialTerm,
+		quit:       make(chan bool),
+		ipcTxQueue: ipcTxQueue,
 	}
 	return wt, nil
 }
+
+// FIXME: make a mechanism between wns and serial that let's wsn know when it can send data,
+// FIXME: sometimes it happens that the RX buffer is full when we want to write making us lose data
 
 func (wt *wsnTerminal) Start() {
 	wt.serial.setup()
