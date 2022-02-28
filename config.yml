@@ -4,3 +4,6 @@ wsn:
   
 kafka:
   brokers: ["localhost:29092"]
+
+log:
+  level: "debug"

@@ -4,3 +4,6 @@ wsn:
 
 kafka:
   brokers: ["kafka:29092"]
+
+log:
+  level: "info"
