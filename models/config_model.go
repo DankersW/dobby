@@ -6,4 +6,9 @@ type Config struct {
 			Port string `yaml:"port"`
 		}
 	}
+	Kafka KafkaConfig
+}
+
+type KafkaConfig struct {
+	Brokers []string `yaml:"brokers"`
 }

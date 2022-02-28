@@ -42,7 +42,7 @@ func Example() {
 	for running {
 		select {
 		case <-publish.C:
-			msg := KafkaTxQueue{Topic: "test", data: []byte("something")}
+			msg := KafkaTxQueue{Topic: "test", Data: []byte("something")}
 			txQueue <- msg
 			producer.Send("test", []byte("hi a msg"))
 		case <-close.C:

@@ -22,6 +22,7 @@ func main() {
 
 	mainCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	txQueue := make(chan kafka.KafkaTxQueue, queue_size)
 
 	//kafka.Example()
 
@@ -29,7 +30,7 @@ func main() {
 	brokers := []string{"localhost:29092"}
 
 	log.Info("Starting IPC handlder")
-	txQueue := make(chan kafka.KafkaTxQueue, queue_size)
+
 	producer, err := kafka.NewProducer(brokers, txQueue)
 	if err != nil {
 		log.Fatalf("Failed to setup kafka producer, %s", err.Error())
@@ -39,7 +40,7 @@ func main() {
 	log.Info("Started IPC handler")
 
 	log.Info("Starting WSN terminal CLI")
-	term, err := wsn_terminal.New(config.Wsn.Usb.Port)
+	term, err := wsn_terminal.New(config.Wsn.Usb.Port, txQueue)
 	if err != nil {
 		log.Fatalf("WSN terminal CLI failed to setup: %s", err.Error())
 	}

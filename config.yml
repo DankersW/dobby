@@ -1,3 +1,6 @@
 wsn:
   usb:
     port: "/dev/ttyACM0"
+  
+kafka:
+  brokers: ["localhost:29092"]
