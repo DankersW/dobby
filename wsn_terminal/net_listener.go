@@ -15,8 +15,6 @@ type wsnNodeMsg struct {
 	ip    string
 }
 
-// TODO: Use a channel to pass data inbetween someone that needs it and the listner
-
 func (wt *wsnTerminal) listen() {
 	rawData := wt.serial.read()
 	if rawData == "" || strings.Contains(rawData, "uart:~$ ") {
@@ -35,7 +33,7 @@ func (wt *wsnTerminal) msgHandler(msg wsnNodeMsg) {
 	case int(wsn.MessageType_SENSOR_DATA):
 		wt.sensorDataHandler(msg.data)
 	default:
-		log.Info("not sup")
+		log.Info("not known type")
 	}
 }
 

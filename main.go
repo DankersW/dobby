@@ -24,14 +24,8 @@ func main() {
 	defer cancel()
 	txQueue := make(chan kafka.KafkaTxQueue, queue_size)
 
-	//kafka.Example()
-
-	// TODO: get kafka from config
-	brokers := []string{"localhost:29092"}
-
 	log.Info("Starting IPC handlder")
-
-	producer, err := kafka.NewProducer(brokers, txQueue)
+	producer, err := kafka.NewProducer(config.Kafka.Brokers, txQueue)
 	if err != nil {
 		log.Fatalf("Failed to setup kafka producer, %s", err.Error())
 		return
