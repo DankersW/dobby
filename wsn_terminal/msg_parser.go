@@ -20,7 +20,7 @@ func (wt *wsnTerminal) parseMsg(rawMsg string) wsnNodeMsg {
 	msg := msgCleanup(rawMsg)
 	headerIndex := strings.Index(msg, HEADER_CHARS)
 	if headerIndex < 0 {
-		log.Warnf("Received a bad msg: %q")
+		log.Warnf("Received a bad msg: %q", msg)
 		return wsnNodeMsg{}
 	}
 	data := msg[headerIndex+len(HEADER_CHARS):]
