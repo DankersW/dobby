@@ -5,7 +5,7 @@ import (
 
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
 	"github.com/DankersW/dobby/kafka"
-	proto "github.com/golang/protobuf/proto"
+	"github.com/DankersW/dobby/models"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -37,16 +37,14 @@ func (wt *wsnTerminal) msgHandler(msg wsnNodeMsg) {
 	}
 }
 
-func (wt *wsnTerminal) sensorDataHandler(data []byte) {
-	sensorData := &wsn.SensorData{}
-	if err := proto.Unmarshal(data, sensorData); err != nil {
-		log.Warnf("Failed to parse SensorData msg, %s", err.Error())
+func (wt *wsnTerminal) sensorDataHandler(rawData []byte) {
+	telemetryData, err := models.TransformWsnSensorDataToIpcSensorDataTelemetry(rawData)
+	if err != nil {
+		log.Warn(err)
 	}
-	log.Debugf("%v\n", sensorData)
-	// TODO: parse recieved data to a differnt data format
 	txItem := kafka.KafkaTxQueue{
 		Topic: "wsn.sensor-data.telemetry",
-		Data:  data,
+		Data:  telemetryData,
 	}
 	wt.ipcTxQueue <- txItem
 }
