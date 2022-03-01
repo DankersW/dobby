@@ -5,7 +5,7 @@ import (
 
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
 	"github.com/DankersW/dobby/kafka"
-	proto "github.com/golang/protobuf/proto"
+	"github.com/DankersW/dobby/models"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -20,7 +20,7 @@ func (wt *wsnTerminal) listen() {
 	if rawData == "" || strings.Contains(rawData, "uart:~$ ") {
 		return
 	}
-	log.Infof("Received: %q", msgCleanup(rawData))
+	log.Debugf("Received: %q", msgCleanup(rawData))
 	msg := wt.parseMsg(rawData)
 	if len(msg.data) == 0 {
 		return
@@ -33,20 +33,18 @@ func (wt *wsnTerminal) msgHandler(msg wsnNodeMsg) {
 	case int(wsn.MessageType_SENSOR_DATA):
 		wt.sensorDataHandler(msg.data)
 	default:
-		log.Info("not known type")
+		log.Warnf("Received an uknown type %q", msg.breed)
 	}
 }
 
-func (wt *wsnTerminal) sensorDataHandler(data []byte) {
-	sensorData := &wsn.SensorData{}
-	if err := proto.Unmarshal(data, sensorData); err != nil {
-		log.Fatalln("Failed to parse address book:", err)
+func (wt *wsnTerminal) sensorDataHandler(rawData []byte) {
+	telemetryData, err := models.TransformWsnSensorDataToIpcSensorDataTelemetry(rawData)
+	if err != nil {
+		log.Warn(err)
 	}
-	log.Debugf("%v\n", sensorData)
-	// TODO: parse recieved data to a differnt data format
 	txItem := kafka.KafkaTxQueue{
-		Topic: "wsn/sensor_data",
-		Data:  data,
+		Topic: "wsn.sensor-data.telemetry",
+		Data:  telemetryData,
 	}
 	wt.ipcTxQueue <- txItem
 }
