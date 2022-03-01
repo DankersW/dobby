@@ -4,7 +4,7 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o dobby .
+RUN CGO_ENABLED=0 go build -o dobby .
 
 FROM alpine:3.15.0
 RUN apk --no-cache add ca-certificates
