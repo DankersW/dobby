@@ -35,6 +35,15 @@ func (u *uart) setup() {
 		time.Sleep(1 * time.Millisecond)
 	}
 	time.Sleep(10 * time.Millisecond)
+	for {
+		u.write("misc ping")
+		u.read()
+		u.read()
+		if u.read() == "pong" {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 	log.Info("Serial setup done")
 }
 

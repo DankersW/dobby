@@ -39,9 +39,6 @@ func New(port string, ipcTxQueue chan kafka.KafkaTxQueue) (WsnTerminal, error) {
 	return wt, nil
 }
 
-// FIXME: make a mechanism between wns and serial that let's wsn know when it can send data,
-// FIXME: sometimes it happens that the RX buffer is full when we want to write making us lose data
-
 func (wt *wsnTerminal) Start() {
 	wt.serial.setup()
 	wt.serial.write("thread monitor temp on")
