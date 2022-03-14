@@ -43,7 +43,7 @@ func (wt *wsnTerminal) sensorDataHandler(rawData []byte) {
 		log.Warn(err)
 	}
 	txItem := kafka.KafkaTxQueue{
-		Topic: "wsn.sensor-data.telemetry",
+		Topic: "wsn.sensor-data.telemetry", // TODO: Add this to a config file
 		Data:  telemetryData,
 	}
 	wt.ipcTxQueue <- txItem
