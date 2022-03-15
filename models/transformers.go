@@ -15,12 +15,12 @@ func TransformWsnSensorDataToIpcSensorDataTelemetry(data []byte) ([]byte, error)
 	}
 
 	var temp float32 = 0.0
-	if sensorData.Temperature > 0 {
+	if sensorData.Temperature != 0 {
 		temp = float32(sensorData.Temperature / 10)
 	}
 
 	var humi float32 = 0.0
-	if sensorData.Humidity > 0 {
+	if sensorData.Humidity != 0 {
 		humi = float32(sensorData.Humidity / 10)
 	}
 
