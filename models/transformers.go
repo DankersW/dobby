@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/ipc"
 	"github.com/DankersW/dobby/home-automation-ipc/generated/go/wsn"
@@ -15,16 +16,17 @@ func TransformWsnSensorDataToIpcSensorDataTelemetry(data []byte) ([]byte, error)
 	}
 
 	var temp float32 = 0.0
-	if sensorData.Temperature > 0 {
+	if sensorData.Temperature != 0 {
 		temp = float32(sensorData.Temperature / 10)
 	}
 
 	var humi float32 = 0.0
-	if sensorData.Humidity > 0 {
+	if sensorData.Humidity != 0 {
 		humi = float32(sensorData.Humidity / 10)
 	}
 
 	telemetryData := ipc.WsnSensorDataTelemetry{
+		Timestamp:   uint32(time.Now().Unix()),
 		SensorId:    sensorData.SensorId,
 		Temperature: temp,
 		Humidity:    humi,
